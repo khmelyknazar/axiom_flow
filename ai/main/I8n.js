@@ -462,15 +462,15 @@ function applyTranslations(lang) {
 
   // Update page title
   document.title = lang === 'ua'
-    ? 'Axiom Flow — ШІ-співробітник для вашого бізнесу 24/7'
-    : 'Axiom Flow — 24/7 AI Employee for Your Business';
+    ? 'Axioma Flow — ШІ-співробітник для вашого бізнесу 24/7'
+    : 'Axioma Flow — 24/7 AI Employee for Your Business';
 
   // Update meta description
   const metaDesc = document.querySelector('meta[name="description"]');
   if (metaDesc) {
     metaDesc.content = lang === 'ua'
-      ? 'Axiom Flow автоматично відповідає в Instagram, Telegram та на сайті, записує клієнтів і збирає контакти — цілодобово, без перерв.'
-      : 'Axiom Flow automatically replies to Instagram, Telegram and website messages, books appointments, and collects customer contacts — 24/7, without breaks.';
+      ? 'Axioma Flow автоматично відповідає в Instagram, Telegram та на сайті, записує клієнтів і збирає контакти — цілодобово, без перерв.'
+      : 'Axioma Flow automatically replies to Instagram, Telegram and website messages, books appointments, and collects customer contacts — 24/7, without breaks.';
   }
 }
 
