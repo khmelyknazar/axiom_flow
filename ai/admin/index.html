@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Axiom Flow — Адмін</title>
+  <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0e0e1a;
+      --surface: #16162a;
+      --surface2: #1e1e35;
+      --border: rgba(124,108,252,0.15);
+      --accent: #7c6cfc;
+      --accent-dim: rgba(124,108,252,0.12);
+      --text: #f0f0ff;
+      --text-muted: #8888aa;
+      --new: #4ade80;
+      --progress: #facc15;
+      --closed: #94a3b8;
+      --red: #f87171;
+      --font-display: 'Unbounded', sans-serif;
+      --font-body: 'DM Sans', sans-serif;
+      --radius: 12px;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      min-height: 100vh;
+    }
+
+    /* ── Login ── */
+    #login-screen {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 24px;
+    }
+    .login-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 48px 40px;
+      width: 100%;
+      max-width: 380px;
+      text-align: center;
+    }
+    .login-logo { font-family: var(--font-display); font-size: 22px; margin-bottom: 8px; }
+    .login-sub { color: var(--text-muted); font-size: 14px; margin-bottom: 32px; }
+    .login-input {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 15px;
+      padding: 12px 16px;
+      margin-bottom: 12px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .login-input:focus { border-color: var(--accent); }
+    .login-btn {
+      width: 100%;
+      background: var(--accent);
+      border: none;
+      border-radius: var(--radius);
+      color: #fff;
+      font-family: var(--font-body);
+      font-size: 15px;
+      font-weight: 500;
+      padding: 13px;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .login-btn:hover { opacity: 0.88; }
+    .login-error { color: var(--red); font-size: 13px; margin-top: 10px; display: none; }
+
+    /* ── App Shell ── */
+    #app { display: none; }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 28px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .topbar-logo { font-family: var(--font-display); font-size: 16px; }
+    .topbar-logo span { color: var(--accent); }
+    .logout-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-muted);
+      font-family: var(--font-body);
+      font-size: 13px;
+      padding: 6px 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .logout-btn:hover { border-color: var(--accent); color: var(--text); }
+
+    .main { padding: 28px; max-width: 1200px; margin: 0 auto; }
+
+    /* ── Stats ── */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+    }
+    .stat-label { color: var(--text-muted); font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px; }
+    .stat-value { font-family: var(--font-display); font-size: 28px; font-weight: 700; }
+    .stat-value.accent { color: var(--accent); }
+    .stat-value.green { color: var(--new); }
+
+    /* ── Filters ── */
+    .filters {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+      align-items: center;
+    }
+    .filter-btn {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      color: var(--text-muted);
+      font-family: var(--font-body);
+      font-size: 13px;
+      padding: 6px 16px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .filter-btn.active, .filter-btn:hover {
+      background: var(--accent-dim);
+      border-color: var(--accent);
+      color: var(--text);
+    }
+    .filter-spacer { flex: 1; }
+    .refresh-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-muted);
+      font-size: 13px;
+      font-family: var(--font-body);
+      padding: 6px 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .refresh-btn:hover { border-color: var(--accent); color: var(--text); }
+
+    /* ── Table ── */
+    .table-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    table { width: 100%; border-collapse: collapse; }
+    thead { background: var(--surface2); }
+    th {
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 12px 16px;
+      text-align: left;
+    }
+    td { padding: 14px 16px; border-top: 1px solid var(--border); font-size: 14px; }
+    tr:hover td { background: var(--accent-dim); }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      border-radius: 100px;
+      font-size: 12px;
+      font-weight: 500;
+      padding: 3px 10px;
+    }
+    .badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; }
+    .badge-new { background: rgba(74,222,128,0.12); color: var(--new); }
+    .badge-new::before { background: var(--new); }
+    .badge-progress { background: rgba(250,204,21,0.12); color: var(--progress); }
+    .badge-progress::before { background: var(--progress); }
+    .badge-closed { background: rgba(148,163,184,0.12); color: var(--closed); }
+    .badge-closed::before { background: var(--closed); }
+
+    .type-pill {
+      background: var(--accent-dim);
+      border-radius: 100px;
+      color: var(--accent);
+      font-size: 11px;
+      padding: 2px 10px;
+    }
+
+    .actions { display: flex; gap: 6px; align-items: center; }
+    .status-select {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 12px;
+      padding: 4px 8px;
+      cursor: pointer;
+      outline: none;
+    }
+    .delete-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 6px;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 14px;
+      padding: 4px 8px;
+      transition: all 0.2s;
+    }
+    .delete-btn:hover { background: rgba(248,113,113,0.1); color: var(--red); border-color: rgba(248,113,113,0.3); }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-muted);
+    }
+    .empty-state .emoji { font-size: 40px; margin-bottom: 12px; }
+
+    /* ── Pagination ── */
+    .pagination {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      align-items: center;
+      margin-top: 20px;
+    }
+    .page-btn {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-muted);
+      font-family: var(--font-body);
+      font-size: 13px;
+      padding: 6px 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .page-btn:hover, .page-btn.active { border-color: var(--accent); color: var(--text); }
+    .page-btn:disabled { opacity: 0.3; cursor: default; }
+    .page-info { color: var(--text-muted); font-size: 13px; }
+
+    /* ── Toast ── */
+    .toast {
+      position: fixed;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      color: var(--text);
+      font-size: 13px;
+      padding: 10px 22px;
+      z-index: 999;
+      opacity: 0;
+      transition: all 0.35s ease;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    .loading { text-align: center; padding: 40px; color: var(--text-muted); }
+
+    @media (max-width: 640px) {
+      .main { padding: 16px; }
+      th:nth-child(3), td:nth-child(3),
+      th:nth-child(4), td:nth-child(4) { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Login ── -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">✦ <span>Axiom Flow</span></div>
+    <div class="login-sub">Адмін-панель</div>
+    <input type="password" class="login-input" id="key-input" placeholder="Секретний ключ" />
+    <button class="login-btn" onclick="login()">Увійти →</button>
+    <div class="login-error" id="login-error">Невірний ключ</div>
+  </div>
+</div>
+
+<!-- ── App ── -->
+<div id="app">
+  <div class="topbar">
+    <div class="topbar-logo">✦ <span>Axiom Flow</span> — Адмін</div>
+    <button class="logout-btn" onclick="logout()">Вийти</button>
+  </div>
+
+  <div class="main">
+    <!-- Stats -->
+    <div class="stats-row" id="stats-row">
+      <div class="stat-card"><div class="stat-label">Всього заявок</div><div class="stat-value accent" id="s-total">—</div></div>
+      <div class="stat-card"><div class="stat-label">Нові</div><div class="stat-value green" id="s-new">—</div></div>
+      <div class="stat-card"><div class="stat-label">Демо-запити</div><div class="stat-value" id="s-demos">—</div></div>
+      <div class="stat-card"><div class="stat-label">Email підписки</div><div class="stat-value" id="s-emails">—</div></div>
+      <div class="stat-card"><div class="stat-label">За 7 днів</div><div class="stat-value" id="s-week">—</div></div>
+    </div>
+
+    <!-- Filters -->
+    <div class="filters">
+      <button class="filter-btn active" onclick="setFilter('status', '')" data-group="status" data-val="">Всі статуси</button>
+      <button class="filter-btn" onclick="setFilter('status', 'new')" data-group="status" data-val="new">Нові</button>
+      <button class="filter-btn" onclick="setFilter('status', 'in_progress')" data-group="status" data-val="in_progress">В роботі</button>
+      <button class="filter-btn" onclick="setFilter('status', 'closed')" data-group="status" data-val="closed">Закриті</button>
+      <span style="color:var(--border)">|</span>
+      <button class="filter-btn active" onclick="setFilter('type', '')" data-group="type" data-val="">Всі типи</button>
+      <button class="filter-btn" onclick="setFilter('type', 'demo')" data-group="type" data-val="demo">Демо</button>
+      <button class="filter-btn" onclick="setFilter('type', 'email')" data-group="type" data-val="email">Email</button>
+      <div class="filter-spacer"></div>
+      <button class="refresh-btn" onclick="loadLeads()">↻ Оновити</button>
+    </div>
+
+    <!-- Table -->
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Email</th>
+            <th>Тип</th>
+            <th>Ім'я / Бізнес</th>
+            <th>Дата</th>
+            <th>Статус</th>
+            <th>Дії</th>
+          </tr>
+        </thead>
+        <tbody id="leads-body">
+          <tr><td colspan="6"><div class="loading">Завантаження...</div></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination" id="pagination"></div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+  // ── Config ────────────────────────────────────────────────
+  // Замінити на URL твого сервера після деплою на Render
+  const API_BASE = window.location.origin;
+
+  let adminKey = '';
+  let currentPage = 1;
+  let filters = { status: '', type: '' };
+
+  // ── Login ─────────────────────────────────────────────────
+  function login() {
+    const key = document.getElementById('key-input').value.trim();
+    if (!key) return;
+    adminKey = key;
+    sessionStorage.setItem('adminKey', key);
+    loadStats();
+    loadLeads();
+  }
+
+  function logout() {
+    adminKey = '';
+    sessionStorage.removeItem('adminKey');
+    document.getElementById('app').style.display = 'none';
+    document.getElementById('login-screen').style.display = 'flex';
+    document.getElementById('key-input').value = '';
+  }
+
+  document.getElementById('key-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') login();
+  });
+
+  // Auto-login if key saved
+  const savedKey = sessionStorage.getItem('adminKey');
+  if (savedKey) {
+    adminKey = savedKey;
+    loadStats();
+    loadLeads();
+  }
+
+  // ── API Helpers ───────────────────────────────────────────
+  async function apiFetch(path, options = {}) {
+    const res = await fetch(`${API_BASE}${path}`, {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        'x-admin-key': adminKey,
+        ...(options.headers || {})
+      }
+    });
+    if (res.status === 401) {
+      document.getElementById('login-error').style.display = 'block';
+      return null;
+    }
+    return res.json();
+  }
+
+  // ── Stats ─────────────────────────────────────────────────
+  async function loadStats() {
+    const data = await apiFetch('/api/stats');
+    if (!data) return;
+    document.getElementById('s-total').textContent = data.total;
+    document.getElementById('s-new').textContent = data.new;
+    document.getElementById('s-demos').textContent = data.demos;
+    document.getElementById('s-emails').textContent = data.emails;
+    document.getElementById('s-week').textContent = data.weekLeads;
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+  }
+
+  // ── Leads ─────────────────────────────────────────────────
+  async function loadLeads() {
+    const params = new URLSearchParams({
+      page: currentPage,
+      limit: 20,
+      ...(filters.status && { status: filters.status }),
+      ...(filters.type && { type: filters.type })
+    });
+
+    const data = await apiFetch(`/api/leads?${params}`);
+    if (!data) return;
+
+    renderLeads(data.leads);
+    renderPagination(data.page, data.pages, data.total);
+  }
+
+  function renderLeads(leads) {
+    const tbody = document.getElementById('leads-body');
+    if (!leads.length) {
+      tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="emoji">📭</div>Заявок немає</div></td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = leads.map(lead => {
+      const date = new Date(lead.createdAt).toLocaleString('uk-UA', {
+        day: '2-digit', month: '2-digit', year: '2-digit',
+        hour: '2-digit', minute: '2-digit'
+      });
+      const statusMap = {
+        new: ['badge-new', 'Нова'],
+        in_progress: ['badge-progress', 'В роботі'],
+        closed: ['badge-closed', 'Закрита']
+      };
+      const [badgeClass, badgeLabel] = statusMap[lead.status] || ['badge-new', 'Нова'];
+      const typeLabel = lead.type === 'demo' ? '📅 Демо' : '📧 Email';
+      const info = [lead.name, lead.businessType].filter(Boolean).join(' · ') || '—';
+
+      return `
+        <tr>
+          <td>${lead.email}</td>
+          <td><span class="type-pill">${typeLabel}</span></td>
+          <td style="color:var(--text-muted)">${info}</td>
+          <td style="color:var(--text-muted);font-size:13px">${date}</td>
+          <td><span class="badge ${badgeClass}">${badgeLabel}</span></td>
+          <td>
+            <div class="actions">
+              <select class="status-select" onchange="updateStatus('${lead._id}', this.value)">
+                <option value="new" ${lead.status === 'new' ? 'selected' : ''}>Нова</option>
+                <option value="in_progress" ${lead.status === 'in_progress' ? 'selected' : ''}>В роботі</option>
+                <option value="closed" ${lead.status === 'closed' ? 'selected' : ''}>Закрита</option>
+              </select>
+              <button class="delete-btn" onclick="deleteLead('${lead._id}')" title="Видалити">✕</button>
+            </div>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  function renderPagination(page, pages, total) {
+    const el = document.getElementById('pagination');
+    if (pages <= 1) { el.innerHTML = ''; return; }
+    el.innerHTML = `
+      <button class="page-btn" onclick="goPage(${page - 1})" ${page <= 1 ? 'disabled' : ''}>← Назад</button>
+      <span class="page-info">Сторінка ${page} з ${pages} · ${total} заявок</span>
+      <button class="page-btn" onclick="goPage(${page + 1})" ${page >= pages ? 'disabled' : ''}>Далі →</button>
+    `;
+  }
+
+  function goPage(p) { currentPage = p; loadLeads(); }
+
+  // ── Filters ───────────────────────────────────────────────
+  function setFilter(group, val) {
+    filters[group] = val;
+    currentPage = 1;
+    document.querySelectorAll(`[data-group="${group}"]`).forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.val === val);
+    });
+    loadLeads();
+  }
+
+  // ── Actions ───────────────────────────────────────────────
+  async function updateStatus(id, status) {
+    const data = await apiFetch(`/api/leads/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ status })
+    });
+    if (data?.success) {
+      showToast('✅ Статус оновлено');
+      loadStats();
+      loadLeads();
+    }
+  }
+
+  async function deleteLead(id) {
+    if (!confirm('Видалити заявку?')) return;
+    const data = await apiFetch(`/api/leads/${id}`, { method: 'DELETE' });
+    if (data?.success) {
+      showToast('🗑 Заявку видалено');
+      loadStats();
+      loadLeads();
+    }
+  }
+
+  // ── Toast ─────────────────────────────────────────────────
+  function showToast(msg) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    setTimeout(() => el.classList.remove('show'), 3000);
+  }
+
+  // ── Auto-refresh every 60s ────────────────────────────────
+  setInterval(() => { if (adminKey) { loadStats(); loadLeads(); } }, 60000);
+</script>
+</body>
+</html>
