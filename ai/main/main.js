@@ -4,7 +4,7 @@
 
 // ===== API CONFIG =====
 // Замінити на URL свого сервера після деплою на Render
-const API_BASE = 'https://ai-receptionist-0ho8.onrender.com';
+const API_BASE = 'https://probable-mushy-polyester.ngrok-free.dev/webhook-test/sales-lead';
 
 // ===== NAV SCROLL =====
 const nav = document.getElementById('nav');
