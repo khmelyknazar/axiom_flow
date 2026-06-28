@@ -149,10 +149,13 @@ async function handleFormSubmit(e) {
   btn.disabled = true;
 
   try {
-    const res = await fetch(`${API_BASE}/api/leads/email`, {
+    const res = await fetch(API_BASE, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: emailInput.value })
+      body: JSON.stringify({ 
+        email: emailInput.value.trim(),
+        form_type: 'cta_main'
+      })
     });
     if (!res.ok) throw new Error('Server error');
     successEl.classList.add('show');
@@ -193,13 +196,14 @@ async function handleDemoForm(e) {
   btn.disabled = true;
 
   try {
-    const res = await fetch(`${API_BASE}/api/leads/demo`, {
+    const res = await fetch(API_BASE, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        name: nameInput.value,
-        email: emailInput.value,
-        businessType: typeInput.value
+        name: nameInput.value.trim(),
+        email: emailInput.value.trim(),
+        business_type: typeInput.value.trim(),
+        form_type: 'modal_demo'
       })
     });
     if (!res.ok) throw new Error('Server error');
